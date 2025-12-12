@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Mandiri - MSIM4408 Etika Profesi</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        body { background-color: #f3f4f6; }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen flex flex-col font-sans">
+        <nav class="bg-blue-800 text-white p-4 shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="font-bold text-xl"><i class="fas fa-graduation-cap mr-2"></i>Latihan MSIM4408</div>
+                <div class="text-sm bg-blue-700 px-3 py-1 rounded">
+                    Sesi/Percobaan ke-{{ currentSession }}
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mx-auto flex flex-col md:flex-row flex-grow mt-6 gap-6 px-4">
+            
+            <aside class="w-full md:w-1/4 bg-white rounded-lg shadow p-4 h-fit">
+                <div class="mb-4">
+                    <button @click="resetSession" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded transition text-sm font-bold">
+                        <i class="fas fa-redo-alt mr-2"></i>Mulai Sesi Baru (Riset)
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2 text-center">*History lama tetap tersimpan</p>
+                </div>
+
+                <div v-for="(modul, modulKey) in bankSoal" :key="modulKey" class="mb-4 border-b pb-2">
+                    <h3 class="font-bold text-gray-700 mb-2">{{ modulKey }}</h3>
+                    <ul class="space-y-1">
+                        <li v-for="(tes, tesKey) in modul" :key="tesKey">
+                            <button 
+                                @click="pilihTes(modulKey, tesKey)"
+                                :class="['w-full text-left px-3 py-2 rounded text-sm transition', 
+                                currentTesKey === tesKey && currentModulKey === modulKey ? 'bg-blue-100 text-blue-800 font-bold border-l-4 border-blue-600' : 'hover:bg-gray-100 text-gray-600']">
+                                {{ tesKey }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <main class="w-full md:w-3/4 pb-10">
+                <div v-if="currentTesKey" class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">{{ currentModulKey }} - {{ currentTesKey }}</h2>
+
+                    <div v-for="(soal, index) in currentSoalList" :key="soal.id" class="mb-10">
+                        <div class="flex items-start gap-3 mb-4">
+                            <span class="bg-gray-200 text-gray-700 font-bold px-3 py-1 rounded-full text-sm">{{ index + 1 }}</span>
+                            <p class="text-lg text-gray-800 leading-relaxed font-medium">{{ soal.pertanyaan }}</p>
+                        </div>
+
+                        <div class="space-y-2 ml-10">
+                            <div v-for="(opsi, key) in soal.pilihan" :key="key" 
+                                class="relative block cursor-pointer group">
+                                <input type="radio" :name="'soal-' + soal.id" :id="'opt-' + soal.id + key" 
+                                    :value="key" v-model="draftJawaban[soal.id]" 
+                                    :disabled="cekStatusJawab(soal.id)"
+                                    class="peer sr-only">
+                                <label :for="'opt-' + soal.id + key" 
+                                    :class="['block w-full p-3 rounded-lg border-2 transition-all',
+                                        getClassOpsi(soal.id, key)
+                                    ]">
+                                    <span class="font-bold mr-2">{{ key }}.</span> {{ opsi }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="ml-10 mt-4" v-if="!cekStatusJawab(soal.id)">
+                            <button @click="submitJawaban(soal)" 
+                                :disabled="!draftJawaban[soal.id]"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                Jawab
+                            </button>
+                        </div>
+
+                        <div v-if="cekStatusJawab(soal.id)" class="ml-10 mt-4">
+                            <div :class="['p-4 rounded-lg border-l-4 shadow-sm', 
+                                getJawabanTerakhir(soal.id).isCorrect ? 'bg-green-50 border-green-500 text-green-900' : 'bg-red-50 border-red-500 text-red-900']">
+                                <div class="flex items-center gap-2 mb-2 font-bold text-lg">
+                                    <i :class="['fas', getJawabanTerakhir(soal.id).isCorrect ? 'fa-check-circle' : 'fa-times-circle']"></i>
+                                    {{ getJawabanTerakhir(soal.id).isCorrect ? 'Jawaban Benar!' : 'Jawaban Kurang Tepat' }}
+                                </div>
+                                <p class="mb-2">
+                                    <span v-if="!getJawabanTerakhir(soal.id).isCorrect">
+                                        Jawaban yang benar adalah <strong>{{ soal.kunci }}. {{ soal.pilihan[soal.kunci] }}</strong>.<br>
+                                    </span>
+                                </p>
+                                <div class="text-sm bg-white bg-opacity-60 p-3 rounded mt-2">
+                                    <strong>Penjelasan:</strong><br>
+                                    {{ soal.penjelasan }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ml-10 mt-4">
+                            <details class="group">
+                                <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-sm text-gray-500 hover:text-blue-600">
+                                    <span> Lihat Riwayat Jawabanmu</span>
+                                    <span class="transition group-open:rotate-180">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                </summary>
+                                <div class="text-gray-600 text-xs mt-2 bg-gray-100 p-3 rounded">
+                                    <ul class="space-y-1">
+                                        <li v-for="(h, hIdx) in getHistorySoal(soal.id)" :key="hIdx" class="flex justify-between border-b border-gray-200 pb-1">
+                                            <span>Sesi {{ h.session }}: Memilih <strong>{{ h.selected }}</strong></span>
+                                            <span :class="h.isCorrect ? 'text-green-600 font-bold' : 'text-red-500'">{{ h.isCorrect ? 'Benar' : 'Salah' }}</span>
+                                        </li>
+                                        <li v-if="getHistorySoal(soal.id).length === 0">Belum ada riwayat.</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </div>
+
+                        <hr class="mt-8 border-gray-300">
+                    </div>
+                </div>
+                
+                <div v-else class="flex flex-col items-center justify-center h-64 text-gray-500">
+                    <i class="fas fa-book-open text-6xl mb-4 text-blue-200"></i>
+                    <p class="text-xl">Pilih Modul & Tes di sebelah kiri untuk mulai belajar.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                // --- STATE MANAGEMENT ---
+                const currentSession = ref(1);
+                const currentModulKey = ref('');
+                const currentTesKey = ref('');
+                const draftJawaban = ref({});
+                const userHistory = ref([]); // { soalId, selected, isCorrect, session, timestamp }
+
+                // --- DATA SOAL (Transkrip dari Gambar) ---
+                const bankSoal = {
+                    "Modul 1: Konsep Dasar Etika": {
+                        "Tes Formatif 1": [
+                            {
+                                id: "m1-tf1-1",
+                                pertanyaan: "Etika adalah suatu cabang ilmu filsafat yang mempelajari tentang sebuah nilai ataupun kualitas (norma). Kata etika berasal dari bahasa Yunani Kuno, yaitu 'ethikos' yang berarti ....",
+                                pilihan: { A: "asas bersama", B: "timbul dari kebiasaan", C: "akhlak mulia", D: "moral utama" },
+                                kunci: "B",
+                                penjelasan: "Kata 'ethikos' dalam bahasa Yunani Kuno berarti 'timbul dari kebiasaan' (adat istiadat/custom). Inilah akar kata dari Ethics."
+                            },
+                            {
+                                id: "m1-tf1-2",
+                                pertanyaan: "Menurut Aristoteles pengertian etika dibagi menjadi dua, yaitu Terminius Technicus dan Manner and Custom. Ilmu pengetahuan yang mempelajari suatu problem tindakan manusia adalah ....",
+                                pilihan: { A: "Manner", B: "Terminius Technicus" }, // Asumsi hanya 2 opsi terlihat di gambar, biasanya ada C/D tapi kita kunci jawaban ada di B.
+                                kunci: "B",
+                                penjelasan: "'Terminius Technicus' adalah etika sebagai ilmu pengetahuan yang mempelajari problem tindakan manusia. Sedangkan 'Manner and Custom' adalah pembahasan etika terkait tata cara dan adat kebiasaan."
+                            },
+                            {
+                                id: "m1-tf1-3",
+                                pertanyaan: "Secara umum etika dibagi menjadi dua, yaitu etika ....",
+                                pilihan: { A: "khusus dan spesial", B: "umum dan khusus", C: "khusus dan individual", D: "umum dan sosial" },
+                                kunci: "B",
+                                penjelasan: "Pembagian etika yang paling mendasar adalah Etika Umum (mempertanyakan prinsip-prinsip dasar moral) dan Etika Khusus (penerapan prinsip dasar pada bidang kehidupan tertentu)."
+                            },
+                            {
+                                id: "m1-tf1-4",
+                                pertanyaan: "Etika yang mengajarkan hal baik dan juga buruk berdasarkan ajaran agama dan kepercayaan yang dianut oleh manusia merupakan etika ....",
+                                pilihan: { A: "sosiologis", B: "deskriptif", C: "teologis", D: "normatif" },
+                                kunci: "C",
+                                penjelasan: "Kata kuncinya adalah 'berdasarkan ajaran agama'. Etika Teologis mendasarkan penilaian baik/buruk pada dalil-dalil agama (Theo = Tuhan)."
+                            },
+                            {
+                                id: "m1-tf1-5",
+                                pertanyaan: "Etika yang mengajarkan dan menetapkan kewajiban-kewajiban yang harus dilakukan oleh manusia untuk hidup yang lebih baik adalah etika ....",
+                                pilihan: { A: "normatif", B: "filosofis", C: "sosiologis", D: "deskriptif" },
+                                kunci: "A",
+                                penjelasan: "Etika Normatif bersifat preskriptif, artinya ia menetapkan norma atau standar (kewajiban) tentang bagaimana manusia 'seharusnya' bertindak."
+                            }
+                        ],
+                        "Tes Formatif 2": [
+                            {
+                                id: "m1-tf2-1",
+                                pertanyaan: "Profesi berasal dari bahasa Inggris 'profession' dan bahasa Latin 'professus' yang berarti ....",
+                                pilihan: { A: "bisa", B: "ahli", C: "ringan", D: "sesuai" },
+                                kunci: "B",
+                                penjelasan: "Secara etimologi, 'professus' berarti menyatakan secara publik (to declare publicly) atau mengakui. Dalam konteks pilihan ganda ini, maknanya sering dikaitkan dengan menjadi 'Ahli' atau mampu menyatakan keahliannya."
+                            },
+                            {
+                                id: "m1-tf2-2",
+                                pertanyaan: "Profesi merupakan suatu pekerjaan yang didasarkan pada studi intelektual dan latihan yang khusus, tujuannya adalah untuk menyediakan pelayanan keterampilan terhadap yang lain dengan bayaran maupun upah tertentu merupakan definisi profesional yang dikemukakan oleh ....",
+                                pilihan: { A: "Cogan", B: "Peter Jarvis", C: "Dedi Supriyadi", D: "Hughes, E.C." },
+                                kunci: "A",
+                                penjelasan: "Ini adalah definisi klasik dari Morris L. Cogan (1953) yang menekankan pada dasar intelektual, latihan khusus, dan pelayanan kepada orang lain."
+                            },
+                            {
+                                id: "m1-tf2-3",
+                                pertanyaan: "Menurut Lakshamana Roa dalam Assegaff (1985:19)... sebuah pekerjaan disebut profesi jika memenuhi empat kriteria berikut, KECUALI ....",
+                                pilihan: { A: "kebebasan dalam pekerjaan itu", B: "panggilan dan keterikatan dengan pekerjaan itu", C: "bayaran yang sangat memadai", D: "tanggung jawab yang terikat pada kode etik" },
+                                kunci: "C",
+                                penjelasan: "Ciri khas profesi adalah pengabdian, kode etik, dan otonomi. 'Bayaran yang sangat memadai' biasanya merupakan *dampak*, bukan *syarat mutlak* atau kriteria etis sebuah profesi menurut teori ini."
+                            },
+                            {
+                                id: "m1-tf2-4",
+                                pertanyaan: "Berikut ini adalah beberapa hal yang termasuk dalam syarat-syarat profesi, KECUALI ....",
+                                pilihan: { A: "akademik yang bertanggung jawab", B: "organisasi profesi", C: "etika dan kode etik profesi", D: "kerja tanpa batas" },
+                                kunci: "D",
+                                penjelasan: "Syarat profesi meliputi adanya standar pendidikan (akademik), organisasi yang menaungi, dan kode etik. 'Kerja tanpa batas' bukanlah syarat profesi, karena profesional juga memiliki batasan wewenang dan waktu."
+                            },
+                            {
+                                id: "m1-tf2-5",
+                                pertanyaan: "Salah satu hal pokok yang harus dimiliki oleh seorang profesional di dalam dirinya adalah ....",
+                                pilihan: { A: "keterampilan", B: "kelapangan", C: "kebijaksanaan", D: "pengalaman" },
+                                kunci: "A",
+                                penjelasan: "Profesionalisme sangat erat kaitannya dengan *Skill* atau Keterampilan khusus yang tidak dimiliki orang awam."
+                            }
+                        ]
+                    }
+                };
+
+                // --- COMPUTED & METHODS ---
+                
+                const currentSoalList = computed(() => {
+                    if (!currentModulKey.value || !currentTesKey.value) return [];
+                    return bankSoal[currentModulKey.value][currentTesKey.value];
+                });
+
+                const pilihTes = (modul, tes) => {
+                    currentModulKey.value = modul;
+                    currentTesKey.value = tes;
+                    draftJawaban.value = {}; // Reset draft select radio visual saja
+                };
+
+                const loadStorage = () => {
+                    const savedHistory = localStorage.getItem('msim4408_history');
+                    const savedSession = localStorage.getItem('msim4408_session');
+                    if (savedHistory) userHistory.value = JSON.parse(savedHistory);
+                    if (savedSession) currentSession.value = parseInt(savedSession);
+                };
+
+                const cekStatusJawab = (soalId) => {
+                    // Cek apakah soal ini SUDAH dijawab pada SESI ini
+                    return userHistory.value.some(h => h.soalId === soalId && h.session === currentSession.value);
+                };
+
+                const getJawabanTerakhir = (soalId) => {
+                    // Ambil jawaban terakhir user di sesi ini
+                    return userHistory.value.find(h => h.soalId === soalId && h.session === currentSession.value);
+                };
+
+                const getHistorySoal = (soalId) => {
+                    // Ambil semua history jawaban untuk soal ini dari sesi-sesi sebelumnya
+                    return userHistory.value.filter(h => h.soalId === soalId).sort((a,b) => b.session - a.session);
+                };
+
+                const submitJawaban = (soal) => {
+                    const pilihanUser = draftJawaban.value[soal.id];
+                    if (!pilihanUser) return;
+
+                    const isCorrect = pilihanUser === soal.kunci;
+                    
+                    const record = {
+                        soalId: soal.id,
+                        selected: pilihanUser,
+                        isCorrect: isCorrect,
+                        session: currentSession.value,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    userHistory.value.unshift(record); // Add to top
+                    localStorage.setItem('msim4408_history', JSON.stringify(userHistory.value));
+                };
+
+                const resetSession = () => {
+                    if(confirm("Apakah Anda ingin memulai sesi baru? History jawaban saat ini akan disimpan, dan Anda bisa menjawab ulang semua soal.")) {
+                        currentSession.value++;
+                        localStorage.setItem('msim4408_session', currentSession.value);
+                        draftJawaban.value = {};
+                        alert("Sesi baru dimulai! Selamat belajar.");
+                    }
+                };
+
+                const getClassOpsi = (soalId, key) => {
+                    const jawaban = getJawabanTerakhir(soalId);
+                    
+                    // Jika belum dijawab, hover effect biasa
+                    if (!jawaban) {
+                        return draftJawaban.value[soalId] === key 
+                            ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                            : 'border-gray-200 hover:bg-gray-50';
+                    }
+
+                    // Jika sudah dijawab
+                    const isSelected = jawaban.selected === key;
+                    
+                    if (key === jawaban.kunciSoal) { 
+                        // Ini logikanya agak tricky karena kita tidak simpan kunci di history, tapi kita tahu dari 'soal'
+                        // Untuk styling simple, kita cek berdasarkan isCorrect
+                    }
+
+                    // Style Logika:
+                    // 1. Kunci Jawaban (Correct Answer) -> Selalu Hijau jika user sudah menjawab
+                    // Kita butuh akses kunci jawaban di loop, untungnya ada di variable 'soal' parent scope
+                    // Tapi di function ini kita cuma punya ID. 
+                    // Kita sederhanakan logic visualnya di dalam template saja atau pakai logic ini:
+                    
+                    // Karena structure agak kompleks, kita handle simple:
+                    if (isSelected) {
+                        return jawaban.isCorrect 
+                            ? 'border-green-500 bg-green-100 text-green-800' // User Pilih Benar
+                            : 'border-red-500 bg-red-100 text-red-800';      // User Pilih Salah
+                    }
+                    
+                    // Kalau user salah, kita mau highlight jawaban yang benar?
+                    // Kita perlu tahu kunci jawaban di sini. 
+                    // (Untuk simplifikasi kode ini, saya tidak highlight jawaban benar secara otomatis di opsi lain, tapi sudah ada di teks Feedback di bawahnya).
+                    
+                    return 'opacity-50 border-gray-100'; // Opsi lain jadi agak transparan
+                };
+
+                onMounted(() => {
+                    loadStorage();
+                });
+
+                return {
+                    bankSoal,
+                    currentModulKey,
+                    currentTesKey,
+                    currentSoalList,
+                    pilihTes,
+                    draftJawaban,
+                    submitJawaban,
+                    cekStatusJawab,
+                    getJawabanTerakhir,
+                    getHistorySoal,
+                    getClassOpsi,
+                    resetSession,
+                    currentSession
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

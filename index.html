@@ -11,7 +11,6 @@
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
         body { background-color: #f8fafc; }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -193,7 +192,6 @@
                                         </div>
                                     </details>
                                 </div>
-
                             </div>
                             
                             <div class="mt-8 border-t pt-6 text-center">
@@ -219,14 +217,12 @@
 
         createApp({
             setup() {
-                // --- STATE NAVIGATION ---
                 const step = ref(1);
                 const selectedMatkul = ref(null);
                 const selectedModulName = ref('');
                 const selectedTesName = ref('');
                 
-                // --- STATE DATA ---
-                // Struktur: Matkul -> Modul -> Tes -> Array Soal
+                // --- DATA SOAL TERUPDATE (REVISI PETER JARVIS) ---
                 const matakuliahList = ref([
                     {
                         kode: "MSIM4408",
@@ -280,24 +276,24 @@
                                     },
                                     {
                                         id: "m1-tf2-2",
-                                        pertanyaan: "Profesi merupakan suatu pekerjaan yang didasarkan pada studi intelektual dan latihan yang khusus... definisi profesional yang dikemukakan oleh ....",
+                                        pertanyaan: "Profesi merupakan suatu pekerjaan yang didasarkan pada studi intelektual dan latihan yang khusus, tujuannya adalah untuk menyediakan pelayanan keterampilan terhadap yang lain dengan bayaran maupun upah tertentu merupakan definisi profesional yang dikemukakan oleh ....",
                                         pilihan: { A: "Cogan", B: "Peter Jarvis", C: "Dedi Supriyadi", D: "Hughes, E.C." },
-                                        kunci: "A",
-                                        penjelasan: "Definisi Morris L. Cogan (1953) menekankan pada dasar intelektual, latihan khusus, dan pelayanan."
+                                        kunci: "B",
+                                        penjelasan: "Anda Benar. Peter Jarvis (1983) secara spesifik mendefinisikan profesi sebagai pekerjaan yang didasarkan pada studi intelektual dan latihan khusus untuk menyediakan pelayanan keterampilan dengan upah tertentu."
                                     },
                                     {
                                         id: "m1-tf2-3",
-                                        pertanyaan: "Menurut Lakshamana Roa... sebuah pekerjaan disebut profesi jika memenuhi empat kriteria berikut, KECUALI ....",
+                                        pertanyaan: "Menurut Lakshamana Roa dalam Assegaff (1985:19) yang dikutip dari media online Media Kontroversi (2020), sebuah pekerjaan disebut profesi jika memenuhi empat kriteria berikut, kecuali ....",
                                         pilihan: { A: "kebebasan dalam pekerjaan itu", B: "panggilan dan keterikatan dengan pekerjaan itu", C: "bayaran yang sangat memadai", D: "tanggung jawab yang terikat pada kode etik" },
                                         kunci: "C",
-                                        penjelasan: "Bayaran tinggi bukanlah kriteria mutlak etis sebuah profesi, melainkan otonomi, panggilan jiwa, dan kode etik."
+                                        penjelasan: "Syarat profesi menurut Roa umumnya meliputi otonomi (kebebasan), panggilan jiwa, dan kode etik. 'Bayaran yang sangat memadai' bukan kriteria penentu etis sebuah profesi (meski diharapkan)."
                                     },
                                     {
                                         id: "m1-tf2-4",
-                                        pertanyaan: "Berikut ini adalah beberapa hal yang termasuk dalam syarat-syarat profesi, KECUALI ....",
+                                        pertanyaan: "Berikut ini adalah beberapa hal yang termasuk dalam syarat-syarat profesi, kecuali ....",
                                         pilihan: { A: "akademik yang bertanggung jawab", B: "organisasi profesi", C: "etika dan kode etik profesi", D: "kerja tanpa batas" },
                                         kunci: "D",
-                                        penjelasan: "Kerja tanpa batas bukan syarat profesi. Profesional bekerja berdasarkan standar dan batasan wewenang."
+                                        penjelasan: "Kerja tanpa batas bukan syarat profesi. Profesional bekerja berdasarkan standar dan batasan wewenang yang jelas."
                                     },
                                     {
                                         id: "m1-tf2-5",
@@ -313,9 +309,8 @@
                 ]);
 
                 // --- STATE SESSION & HISTORY ---
-                const sessionID = ref(Date.now()); // ID Sesi global saat load page
-                const userHistory = ref([]); // Menyimpan semua jawaban
-                const currentSessionMap = ref({}); // Menyimpan session ID per TES (untuk fitur reset granular)
+                const userHistory = ref([]);
+                const currentSessionMap = ref({});
 
                 // --- NAVIGATION METHODS ---
                 const selectMatkul = (mk) => {
@@ -328,7 +323,6 @@
                 };
                 const selectTes = (tesName) => {
                     selectedTesName.value = tesName;
-                    // Inisialisasi session ID untuk tes ini jika belum ada
                     const key = getTesSessionKey();
                     if(!currentSessionMap.value[key]) {
                         currentSessionMap.value[key] = Date.now();
@@ -373,7 +367,7 @@
                         selected: selectedKey,
                         isCorrect: isCorrect,
                         timestamp: new Date().toISOString(),
-                        tesSessionId: getCurrentTesSessionID(), // Session ID spesifik tes ini
+                        tesSessionId: getCurrentTesSessionID(),
                         matkul: selectedMatkul.value.kode,
                         modul: selectedModulName.value,
                         tes: selectedTesName.value
@@ -386,9 +380,8 @@
                 const resetCurrentTes = () => {
                     if(confirm("Yakin ingin mereset tes ini? Jawaban Anda saat ini akan hilang dari tampilan, tapi riwayat tetap tersimpan.")) {
                         const key = getTesSessionKey();
-                        // Ganti session ID untuk tes ini saja -> Otomatis UI akan 'bersih' karena filter session beda
                         currentSessionMap.value[key] = Date.now();
-                        saveHistory(); // Simpan map session baru
+                        saveHistory();
                     }
                 };
 
@@ -403,7 +396,6 @@
                 };
 
                 const getHistoryBySoal = (soalId) => {
-                    // Ambil semua history untuk soal ini, urutkan dari terbaru
                     return userHistory.value.filter(h => h.soalId === soalId);
                 };
 
@@ -414,7 +406,7 @@
                 // --- STYLING HELPERS ---
                 const getOptionClass = (soal, key) => {
                     const answer = getLastAnswer(soal.id);
-                    if (!answer) return 'border-slate-200 hover:bg-slate-50 hover:border-indigo-300'; // Belum dijawab
+                    if (!answer) return 'border-slate-200 hover:bg-slate-50 hover:border-indigo-300';
 
                     if (answer.selected === key) {
                         return answer.isCorrect 

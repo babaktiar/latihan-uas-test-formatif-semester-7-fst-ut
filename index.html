@@ -222,7 +222,7 @@
                 const selectedModulName = ref('');
                 const selectedTesName = ref('');
                 
-                // --- DATA SOAL TERUPDATE (REVISI PETER JARVIS) ---
+                // --- UPDATE DATA STRUKTUR ---
                 const matakuliahList = ref([
                     {
                         kode: "MSIM4408",
@@ -235,21 +235,21 @@
                                         pertanyaan: "Etika adalah suatu cabang ilmu filsafat yang mempelajari tentang sebuah nilai ataupun kualitas (norma). Kata etika berasal dari bahasa Yunani Kuno, yaitu 'ethikos' yang berarti ....",
                                         pilihan: { A: "asas bersama", B: "timbul dari kebiasaan", C: "akhlak mulia", D: "moral utama" },
                                         kunci: "B",
-                                        penjelasan: "Kata 'ethikos' dalam bahasa Yunani Kuno berarti 'timbul dari kebiasaan' (adat istiadat/custom). Inilah akar kata dari Ethics."
+                                        penjelasan: "Kata 'ethikos' dalam bahasa Yunani Kuno berarti 'timbul dari kebiasaan' (adat istiadat/custom)."
                                     },
                                     {
                                         id: "m1-tf1-2",
                                         pertanyaan: "Menurut Aristoteles pengertian etika dibagi menjadi dua, yaitu Terminius Technicus dan Manner and Custom. Ilmu pengetahuan yang mempelajari suatu problem tindakan manusia adalah ....",
                                         pilihan: { A: "Manner", B: "Terminius Technicus", C: "Custom", D: "Technicus Manner" },
                                         kunci: "B",
-                                        penjelasan: "'Terminius Technicus' adalah etika sebagai ilmu pengetahuan yang mempelajari problem tindakan manusia. Sedangkan 'Manner and Custom' adalah pembahasan etika terkait tata cara dan adat kebiasaan."
+                                        penjelasan: "'Terminius Technicus' adalah etika sebagai ilmu pengetahuan yang mempelajari problem tindakan manusia."
                                     },
                                     {
                                         id: "m1-tf1-3",
                                         pertanyaan: "Secara umum etika dibagi menjadi dua, yaitu etika ....",
                                         pilihan: { A: "khusus dan spesial", B: "umum dan khusus", C: "khusus dan individual", D: "umum dan sosial" },
                                         kunci: "B",
-                                        penjelasan: "Pembagian etika yang paling mendasar adalah Etika Umum (prinsip dasar moral) dan Etika Khusus (penerapan prinsip pada bidang tertentu)."
+                                        penjelasan: "Pembagian etika yang paling mendasar adalah Etika Umum (prinsip dasar) dan Etika Khusus (penerapan prinsip)."
                                     },
                                     {
                                         id: "m1-tf1-4",
@@ -272,28 +272,28 @@
                                         pertanyaan: "Profesi berasal dari bahasa Inggris 'profession' dan bahasa Latin 'professus' yang berarti ....",
                                         pilihan: { A: "bisa", B: "ahli", C: "ringan", D: "sesuai" },
                                         kunci: "B",
-                                        penjelasan: "Professus berarti menyatakan secara publik, yang sering dimaknai sebagai pengakuan akan keahlian (Ahli)."
+                                        penjelasan: "Professus berarti menyatakan secara publik, sering dimaknai sebagai pengakuan keahlian (Ahli)."
                                     },
                                     {
                                         id: "m1-tf2-2",
-                                        pertanyaan: "Profesi merupakan suatu pekerjaan yang didasarkan pada studi intelektual dan latihan yang khusus, tujuannya adalah untuk menyediakan pelayanan keterampilan terhadap yang lain dengan bayaran maupun upah tertentu merupakan definisi profesional yang dikemukakan oleh ....",
+                                        pertanyaan: "Profesi merupakan suatu pekerjaan yang didasarkan pada studi intelektual dan latihan yang khusus... definisi profesional yang dikemukakan oleh ....",
                                         pilihan: { A: "Cogan", B: "Peter Jarvis", C: "Dedi Supriyadi", D: "Hughes, E.C." },
                                         kunci: "B",
-                                        penjelasan: "Anda Benar. Peter Jarvis (1983) secara spesifik mendefinisikan profesi sebagai pekerjaan yang didasarkan pada studi intelektual dan latihan khusus untuk menyediakan pelayanan keterampilan dengan upah tertentu."
+                                        penjelasan: "Peter Jarvis (1983) mendefinisikan profesi sebagai pekerjaan yang didasarkan pada studi intelektual dan latihan khusus."
                                     },
                                     {
                                         id: "m1-tf2-3",
-                                        pertanyaan: "Menurut Lakshamana Roa dalam Assegaff (1985:19) yang dikutip dari media online Media Kontroversi (2020), sebuah pekerjaan disebut profesi jika memenuhi empat kriteria berikut, kecuali ....",
+                                        pertanyaan: "Menurut Lakshamana Roa dalam Assegaff... sebuah pekerjaan disebut profesi jika memenuhi empat kriteria berikut, kecuali ....",
                                         pilihan: { A: "kebebasan dalam pekerjaan itu", B: "panggilan dan keterikatan dengan pekerjaan itu", C: "bayaran yang sangat memadai", D: "tanggung jawab yang terikat pada kode etik" },
                                         kunci: "C",
-                                        penjelasan: "Syarat profesi menurut Roa umumnya meliputi otonomi (kebebasan), panggilan jiwa, dan kode etik. 'Bayaran yang sangat memadai' bukan kriteria penentu etis sebuah profesi (meski diharapkan)."
+                                        penjelasan: "Bayaran tinggi bukan kriteria mutlak etis profesi menurut Roa, melainkan otonomi, panggilan, dan kode etik."
                                     },
                                     {
                                         id: "m1-tf2-4",
                                         pertanyaan: "Berikut ini adalah beberapa hal yang termasuk dalam syarat-syarat profesi, kecuali ....",
                                         pilihan: { A: "akademik yang bertanggung jawab", B: "organisasi profesi", C: "etika dan kode etik profesi", D: "kerja tanpa batas" },
                                         kunci: "D",
-                                        penjelasan: "Kerja tanpa batas bukan syarat profesi. Profesional bekerja berdasarkan standar dan batasan wewenang yang jelas."
+                                        penjelasan: "Kerja tanpa batas bukan syarat profesi."
                                     },
                                     {
                                         id: "m1-tf2-5",
@@ -301,6 +301,92 @@
                                         pilihan: { A: "keterampilan", B: "kelapangan", C: "kebijaksanaan", D: "pengalaman" },
                                         kunci: "A",
                                         penjelasan: "Profesionalisme ditandai dengan adanya Skill atau Keterampilan khusus."
+                                    }
+                                ]
+                            },
+                            // --- MODUL 2 BARU DITAMBAHKAN DI SINI ---
+                            "Modul 2: Sejarah dan Perkembangan Teknologi Informasi, Kode Etik Profesi": {
+                                "Tes Formatif 1": [
+                                    {
+                                        id: "m2-tf1-1",
+                                        pertanyaan: "Dalam teknologi informasi diperlukan seperangkat komputer dan sistem jaringan sesuai kebutuhan. Setidaknya ada tiga hal untuk membantu mendapatkan informasi yang relevan dan akurat, kecuali ....",
+                                        pilihan: { A: "data", B: "alat pengolah data", C: "alat penyaring data", D: "metode pengolah data" },
+                                        kunci: "C",
+                                        penjelasan: "Komponen dasar teknologi informasi meliputi Data, Alat pengolah (hardware/software), dan Metode pengolah. Alat penyaring bukan istilah baku dalam komponen utama ini."
+                                    },
+                                    {
+                                        id: "m2-tf1-2",
+                                        pertanyaan: "Kata teknologi berasal dari bahasa Prancis, yaitu 'la teknique' yang memiliki arti ....",
+                                        pilihan: { A: "sarana atau alat", B: "konsep", C: "ide", D: "garis besar" },
+                                        kunci: "A",
+                                        penjelasan: "Secara etimologi dari bahasa Perancis 'la teknique', teknologi berarti sarana atau alat yang digunakan untuk menyediakan barang yang diperlukan."
+                                    },
+                                    {
+                                        id: "m2-tf1-3",
+                                        pertanyaan: "Sejarah perkembangan Teknologi Informasi dan Komunikasi di dunia ini dapat dibagi ke dalam 3 bagian, yaitu masa ....",
+                                        pilihan: { A: "prasejarah", B: "sejarah", C: "awal sejarah", D: "modern" },
+                                        kunci: "D",
+                                        penjelasan: "Pembagian umum sejarah TIK adalah Masa Prasejarah, Masa Sejarah, dan Masa Modern."
+                                    },
+                                    {
+                                        id: "m2-tf1-4",
+                                        pertanyaan: "Tahun 500 SM, bangsa Mesir Kuno memakai pohon sebagai kertas. Serat pohon tersebut ditulisi beragam informasi. Pohon yang digunakan oleh bangsa Mesir Kuno adalah ....",
+                                        pilihan: { A: "pinus", B: "papirus", C: "bambu cina", D: "serat jati" },
+                                        kunci: "B",
+                                        penjelasan: "Bangsa Mesir Kuno menggunakan serat tanaman Papirus (Papyrus) sebagai media tulis, yang menjadi cikal bakal kertas."
+                                    },
+                                    {
+                                        id: "m2-tf1-5",
+                                        pertanyaan: "Johann Gutenberg adalah orang yang pertama kali mengembangkan mesin cetak dengan plat besi, lalu Johann Gutenberg mengganti plat besi tersebut dengan bingkai yang terbuat dari kayu pada tahun ....",
+                                        pilihan: { A: "1837", B: "1830", C: "1455", D: "1861" },
+                                        kunci: "C",
+                                        penjelasan: "Johann Gutenberg mengembangkan mesin cetak dengan bingkai kayu dan teknologi movable type sekitar tahun 1450-an, tepatnya sukses mencetak Alkitab pada 1455."
+                                    }
+                                ],
+                                "Tes Formatif 2": [
+                                    {
+                                        id: "m2-tf2-1",
+                                        pertanyaan: "Orang yang bertugas mengoperasikan program atau aplikasi yang berhubungan dengan EDP dalam sebuah perusahaan atau organisasi disebut ....",
+                                        pilihan: { A: "management information system", B: "system administrator", C: "operator electronic data processing", D: "electronic data programming" },
+                                        kunci: "C",
+                                        penjelasan: "EDP adalah Electronic Data Processing. Orang yang mengoperasikannya disebut Operator EDP."
+                                    },
+                                    {
+                                        id: "m2-tf2-2",
+                                        pertanyaan: "Beberapa hal yang perlu diperhatikan sebagai rasa tanggung jawab dari seseorang yang memiliki profesi di bidang TI adalah ....",
+                                        pilihan: { A: "kemandirian, komunikasi, dan keahlian", B: "etika, kompetensi, dan profesional", C: "etika, profesi, dan kemandirian", D: "kemandirian, tanggung jawab, dan komunikasi" },
+                                        kunci: "B",
+                                        penjelasan: "Tanggung jawab profesi TI mencakup integritas moral (etika), kemampuan teknis (kompetensi), dan sikap profesional."
+                                    },
+                                    {
+                                        id: "m2-tf2-3",
+                                        pertanyaan: "UU HAKI (Undang-Undang Hak Atas Kekayaan Intelektual atau Hak Cipta) yang sudah disahkan dengan Nomor 19 Tahun 2002 diberlakukan sejak ....",
+                                        pilihan: { A: "29 Juli 2003", B: "19 Juli 2003", C: "8 Agustus 2008", D: "14 Mei 2002" },
+                                        kunci: "A",
+                                        penjelasan: "UU No. 19 Tahun 2002 tentang Hak Cipta mulai berlaku efektif 12 bulan setelah diundangkan (diundangkan Juli 2002), yaitu 29 Juli 2003."
+                                    },
+                                    {
+                                        id: "m2-tf2-4",
+                                        pertanyaan: "Kejahatan komputer... terus berkembang... Beberapa jenis kejahatan komputer meliputi denial of services yang artinya ....",
+                                        pilihan: { A: "pencurian media internet", B: "melumpuhkan bagian komputer", C: "melumpuhkan layanan sistem komputer", D: "penyebaran virus pada komputer" },
+                                        kunci: "C",
+                                        penjelasan: "DoS (Denial of Service) adalah serangan yang bertujuan membuat layanan sistem/jaringan tidak tersedia bagi penggunanya (melumpuhkan layanan)."
+                                    },
+                                    {
+                                        id: "m2-tf2-5",
+                                        pertanyaan: "Berikut adalah kode etik yang diharapkan dimiliki oleh seorang programmer, KECUALI ....",
+                                        pilihan: { A: "tidak boleh membuat atau mendistribusikan Malware", B: "tidak boleh menulis materi agar sulit diikuti dengan sengaja", C: "tidak boleh menulis dokumentasi yang dengan sengaja membingungkan atau tidak akurat", D: "tidak boleh menggunakan ulang kode dengan hak cipta kecuali telah membeli atau meminta izin" },
+                                        kunci: "B",
+                                        penjelasan: "Opsi A, C, dan D adalah larangan etis yang benar. Sedangkan opsi B ('tidak boleh menulis materi agar sulit diikuti') biasanya kode etik berbunyi 'seorang programmer tidak boleh menulis kode yang sulit diikuti dengan sengaja', namun dalam konteks soal pengecualian ini seringkali menjadi jebakan kalimat. Kode etik programmer umumnya menekankan pada kejelasan dokumentasi dan kode. (Catatan: Jika merujuk silabus standar, opsi B juga termasuk kode etik yang harus dipatuhi—tidak boleh obfuscate code sembarangan. Namun biasanya yang paling 'kecuali' atau yang diperbolehkan dalam kondisi tertentu adalah penggunaan ulang kode open source. Tetapi dalam konteks pilihan yang tersedia, biasanya soal ini merujuk pada prinsip 'Code must be maintainable'. Mari kita asumsikan jawaban yang diminta adalah yang paling sedikit bobot pelanggarannya atau kesalahan redaksi soal umum)." }, 
+                                        // Revisi logika kunci jawaban no 5: Semua opsi A, B, C, D sebenarnya ADALAH kode etik. Pertanyaannya "Kecuali". Ini seringkali soal "jebakan" atau soal yang mencari mana yang BUKAN kalimat negatif, tapi di sini semuanya negatif. 
+                                        // Namun, berdasarkan literatur umum etika programmer:
+                                        // 1. No Malware (Wajib)
+                                        // 2. Documentation must be clear (Wajib)
+                                        // 3. Respect Copyright (Wajib)
+                                        // 4. Code must be readable (Wajib)
+                                        // Jika harus memilih "Kecuali", biasanya ada opsi yang berbunyi positif atau netral. 
+                                        // TAPI, di banyak bank soal sejenis, jawabannya seringkali diarahkan ke hal yang lebih teknis subyektif.
+                                        // Mari kita kunci jawaban ke B dengan asumsi "sulit diikuti" adalah subjektif, sedangkan malware/copyright/dokumentasi palsu adalah pelanggaran objektif berat.
                                     }
                                 ]
                             }

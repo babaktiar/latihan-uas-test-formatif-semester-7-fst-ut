@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Mandiri - MSIM4408</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        body { background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen flex flex-col font-sans text-slate-800">
+        
+        <nav class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3 cursor-pointer" @click="goHome">
+                    <i class="fas fa-university text-2xl text-indigo-300"></i>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Latihan Mandiri UT</h1>
+                        <p class="text-xs text-indigo-300">Sistem Latihan Soal Interaktif</p>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex text-sm font-medium text-indigo-200 gap-2 items-center">
+                    <span :class="step >= 1 ? 'text-white' : ''">Matkul</span>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <span :class="step >= 2 ? 'text-white' : ''">Modul</span>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <span :class="step >= 3 ? 'text-white' : ''">Tes</span>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container mx-auto px-4 py-8 flex-grow">
+            
+            <div v-if="step > 1" class="mb-6">
+                <button @click="goBack" class="flex items-center text-indigo-700 hover:text-indigo-900 font-semibold transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali
+                </button>
+            </div>
+
+            <transition name="fade" mode="out-in">
+                <div v-if="step === 1" key="step1">
+                    <h2 class="text-2xl font-bold mb-6 border-b-2 border-indigo-200 pb-2">Pilih Mata Kuliah</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div v-for="mk in matakuliahList" :key="mk.kode" 
+                            @click="selectMatkul(mk)"
+                            class="bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer overflow-hidden border border-slate-200">
+                            <div class="h-2 bg-indigo-600"></div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded">{{ mk.kode }}</span>
+                                    <i class="fas fa-book text-indigo-200 text-4xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2">{{ mk.nama }}</h3>
+                                <p class="text-sm text-slate-500">{{ Object.keys(mk.modul).length }} Modul Tersedia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else-if="step === 2" key="step2">
+                    <h2 class="text-2xl font-bold mb-2">{{ selectedMatkul.nama }}</h2>
+                    <p class="text-slate-500 mb-6 border-b pb-4">Kode: {{ selectedMatkul.kode }}</p>
+                    
+                    <h3 class="text-lg font-semibold mb-4 text-indigo-800"><i class="fas fa-layer-group mr-2"></i>Daftar Modul</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div v-for="(content, modulName) in selectedMatkul.modul" :key="modulName"
+                            @click="selectModul(modulName)"
+                            class="bg-white p-5 rounded-lg shadow hover:shadow-md border-l-4 border-indigo-500 cursor-pointer hover:bg-indigo-50 transition flex justify-between items-center group">
+                            <span class="font-bold text-lg text-slate-700 group-hover:text-indigo-700">{{ modulName }}</span>
+                            <i class="fas fa-chevron-right text-slate-300 group-hover:text-indigo-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else-if="step === 3" key="step3">
+                    <h2 class="text-2xl font-bold mb-1">{{ selectedModulName }}</h2>
+                    <p class="text-slate-500 mb-6 border-b pb-4">{{ selectedMatkul.nama }}</p>
+
+                    <h3 class="text-lg font-semibold mb-4 text-indigo-800"><i class="fas fa-tasks mr-2"></i>Pilih Latihan Tes</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div v-for="(soalList, tesName) in getTesList" :key="tesName"
+                            @click="selectTes(tesName)"
+                            class="bg-white p-6 rounded-lg shadow hover:shadow-md cursor-pointer border border-slate-200 hover:border-indigo-300 transition relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 opacity-10">
+                                <i class="fas fa-pencil-alt text-6xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-indigo-700 mb-2">{{ tesName }}</h4>
+                            <p class="text-sm text-slate-500">{{ soalList.length }} Soal Pilihan Ganda</p>
+                            <div class="mt-4 flex gap-2">
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded" 
+                                      v-if="hasHistory(selectedMatkul.kode, selectedModulName, tesName)">
+                                    <i class="fas fa-history mr-1"></i>Pernah Dikerjakan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else-if="step === 4" key="step4">
+                    <div class="bg-white rounded-xl shadow-xl overflow-hidden min-h-[600px] flex flex-col">
+                        <div class="bg-indigo-50 p-6 border-b border-indigo-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-indigo-900">{{ selectedTesName }}</h2>
+                                <p class="text-sm text-indigo-600">{{ selectedModulName }}</p>
+                            </div>
+                            <button @click="resetCurrentTes" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow text-sm font-bold transition flex items-center">
+                                <i class="fas fa-redo-alt mr-2"></i> Reset Tes Ini
+                            </button>
+                        </div>
+
+                        <div class="p-6 md:p-8 flex-grow">
+                            <div v-for="(soal, index) in currentSoalList" :key="soal.id" class="mb-12">
+                                <div class="flex gap-4 mb-5">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm mt-1">
+                                        {{ index + 1 }}
+                                    </div>
+                                    <div class="text-lg text-slate-800 font-medium leading-relaxed">
+                                        {{ soal.pertanyaan }}
+                                    </div>
+                                </div>
+
+                                <div class="pl-12 space-y-3">
+                                    <div v-for="(teks, key) in soal.pilihan" :key="key" class="relative">
+                                        <input type="radio" 
+                                            :name="soal.id" 
+                                            :id="soal.id + key" 
+                                            :value="key"
+                                            :disabled="isAnsweredInCurrentSession(soal.id)"
+                                            @change="submitAnswer(soal, key)"
+                                            class="peer sr-only">
+                                        
+                                        <label :for="soal.id + key"
+                                            :class="['flex items-center p-3 rounded-lg border-2 transition-all cursor-pointer select-none',
+                                                getOptionClass(soal, key)
+                                            ]">
+                                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 font-bold text-xs"
+                                                :class="getOptionBulletClass(soal, key)">
+                                                {{ key }}
+                                            </div>
+                                            <span class="text-slate-700">{{ teks }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div v-if="isAnsweredInCurrentSession(soal.id)" class="pl-12 mt-4 animate-fade-in-down">
+                                    <div :class="['p-4 rounded-lg border-l-4 shadow-sm', 
+                                        getLastAnswer(soal.id).isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500']">
+                                        
+                                        <div class="flex items-center gap-2 font-bold text-lg mb-1" 
+                                             :class="getLastAnswer(soal.id).isCorrect ? 'text-green-700' : 'text-red-700'">
+                                            <i :class="['fas', getLastAnswer(soal.id).isCorrect ? 'fa-check-circle' : 'fa-times-circle']"></i>
+                                            {{ getLastAnswer(soal.id).isCorrect ? 'Jawaban Benar' : 'Jawaban Salah' }}
+                                        </div>
+
+                                        <p v-if="!getLastAnswer(soal.id).isCorrect" class="text-sm text-red-800 mb-2">
+                                            Jawaban yang tepat adalah: <strong>{{ soal.kunci }}. {{ soal.pilihan[soal.kunci] }}</strong>
+                                        </p>
+
+                                        <div class="mt-2 text-sm text-slate-600 bg-white/50 p-3 rounded">
+                                            <strong class="block text-indigo-900 mb-1">Penjelasan:</strong>
+                                            {{ soal.penjelasan }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pl-12 mt-2">
+                                    <details class="group">
+                                        <summary class="text-xs text-slate-400 cursor-pointer hover:text-indigo-600 list-none flex items-center gap-1">
+                                            <i class="fas fa-history"></i> Lihat Riwayat Jawaban
+                                        </summary>
+                                        <div class="mt-2 p-3 bg-slate-100 rounded text-xs">
+                                            <ul class="space-y-1">
+                                                <li v-for="(h, idx) in getHistoryBySoal(soal.id)" :key="idx" class="flex justify-between border-b border-slate-200 pb-1">
+                                                    <span>{{ formatDate(h.timestamp) }}</span>
+                                                    <span :class="h.isCorrect ? 'text-green-600 font-bold' : 'text-red-500'">
+                                                        Memilih {{ h.selected }} ({{ h.isCorrect ? 'Benar' : 'Salah' }})
+                                                    </span>
+                                                </li>
+                                                <li v-if="getHistoryBySoal(soal.id).length === 0" class="text-slate-400 italic">Belum ada riwayat.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 border-t pt-6 text-center">
+                                <button @click="goBack" class="text-indigo-600 font-bold hover:underline">
+                                    Pilih Tes Lain
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </transition>
+        </main>
+
+        <footer class="bg-slate-800 text-slate-400 py-6 text-center text-sm">
+            <p>Dibuat untuk Latihan Mandiri Mahasiswa UT</p>
+            <p class="text-xs mt-1">MSIM4408 - Etika Profesi</p>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const step = ref(1);
+                const selectedMatkul = ref(null);
+                const selectedModulName = ref('');
+                const selectedTesName = ref('');
+                
+                // --- UPDATE DATA STRUKTUR ---
+                const matakuliahList = ref([
+                    {
+                        kode: "MSIM4408",
+                        nama: "Etika Profesi",
+                        modul: {
+                            "Modul 1: Prinsip Dasar Etika, Profesi, dan Profesionalisme Bidang Teknologi Informasi": {
+                                "Tes Formatif 1": [
+                                    {
+                                        id: "m1-tf1-1",
+                                        pertanyaan: "Etika adalah suatu cabang ilmu filsafat yang mempelajari tentang sebuah nilai ataupun kualitas (norma). Kata etika berasal dari bahasa Yunani Kuno, yaitu 'ethikos' yang berarti ....",
+                                        pilihan: { A: "asas bersama", B: "timbul dari kebiasaan", C: "akhlak mulia", D: "moral utama" },
+                                        kunci: "B",
+                                        penjelasan: "Kata 'ethikos' dalam bahasa Yunani Kuno berarti 'timbul dari kebiasaan' (adat istiadat/custom)."
+                                    },
+                                    {
+                                        id: "m1-tf1-2",
+                                        pertanyaan: "Menurut Aristoteles pengertian etika dibagi menjadi dua, yaitu Terminius Technicus dan Manner and Custom. Ilmu pengetahuan yang mempelajari suatu problem tindakan manusia adalah ....",
+                                        pilihan: { A: "Manner", B: "Terminius Technicus", C: "Custom", D: "Technicus Manner" },
+                                        kunci: "B",
+                                        penjelasan: "'Terminius Technicus' adalah etika sebagai ilmu pengetahuan yang mempelajari problem tindakan manusia."
+                                    },
+                                    {
+                                        id: "m1-tf1-3",
+                                        pertanyaan: "Secara umum etika dibagi menjadi dua, yaitu etika ....",
+                                        pilihan: { A: "khusus dan spesial", B: "umum dan khusus", C: "khusus dan individual", D: "umum dan sosial" },
+                                        kunci: "B",
+                                        penjelasan: "Pembagian etika yang paling mendasar adalah Etika Umum (prinsip dasar) dan Etika Khusus (penerapan prinsip)."
+                                    },
+                                    {
+                                        id: "m1-tf1-4",
+                                        pertanyaan: "Etika yang mengajarkan hal baik dan juga buruk berdasarkan ajaran agama dan kepercayaan yang dianut oleh manusia merupakan etika ....",
+                                        pilihan: { A: "sosiologis", B: "deskriptif", C: "teologis", D: "normatif" },
+                                        kunci: "C",
+                                        penjelasan: "Etika Teologis mendasarkan penilaian baik/buruk pada dalil-dalil agama (Theo = Tuhan)."
+                                    },
+                                    {
+                                        id: "m1-tf1-5",
+                                        pertanyaan: "Etika yang mengajarkan dan menetapkan kewajiban-kewajiban yang harus dilakukan oleh manusia untuk hidup yang lebih baik adalah etika ....",
+                                        pilihan: { A: "normatif", B: "filosofis", C: "sosiologis", D: "deskriptif" },
+                                        kunci: "A",
+                                        penjelasan: "Etika Normatif bersifat preskriptif, menetapkan norma/kewajiban tentang bagaimana manusia 'seharusnya' bertindak."
+                                    }
+                                ],
+                                "Tes Formatif 2": [
+                                    {
+                                        id: "m1-tf2-1",
+                                        pertanyaan: "Profesi berasal dari bahasa Inggris 'profession' dan bahasa Latin 'professus' yang berarti ....",
+                                        pilihan: { A: "bisa", B: "ahli", C: "ringan", D: "sesuai" },
+                                        kunci: "B",
+                                        penjelasan: "Professus berarti menyatakan secara publik, sering dimaknai sebagai pengakuan keahlian (Ahli)."
+                                    },
+                                    {
+                                        id: "m1-tf2-2",
+                                        pertanyaan: "Profesi merupakan suatu pekerjaan yang didasarkan pada studi intelektual dan latihan yang khusus... definisi profesional yang dikemukakan oleh ....",
+                                        pilihan: { A: "Cogan", B: "Peter Jarvis", C: "Dedi Supriyadi", D: "Hughes, E.C." },
+                                        kunci: "B",
+                                        penjelasan: "Peter Jarvis (1983) mendefinisikan profesi sebagai pekerjaan yang didasarkan pada studi intelektual dan latihan khusus."
+                                    },
+                                    {
+                                        id: "m1-tf2-3",
+                                        pertanyaan: "Menurut Lakshamana Roa dalam Assegaff... sebuah pekerjaan disebut profesi jika memenuhi empat kriteria berikut, kecuali ....",
+                                        pilihan: { A: "kebebasan dalam pekerjaan itu", B: "panggilan dan keterikatan dengan pekerjaan itu", C: "bayaran yang sangat memadai", D: "tanggung jawab yang terikat pada kode etik" },
+                                        kunci: "C",
+                                        penjelasan: "Bayaran tinggi bukan kriteria mutlak etis profesi menurut Roa, melainkan otonomi, panggilan, dan kode etik."
+                                    },
+                                    {
+                                        id: "m1-tf2-4",
+                                        pertanyaan: "Berikut ini adalah beberapa hal yang termasuk dalam syarat-syarat profesi, kecuali ....",
+                                        pilihan: { A: "akademik yang bertanggung jawab", B: "organisasi profesi", C: "etika dan kode etik profesi", D: "kerja tanpa batas" },
+                                        kunci: "D",
+                                        penjelasan: "Kerja tanpa batas bukan syarat profesi."
+                                    },
+                                    {
+                                        id: "m1-tf2-5",
+                                        pertanyaan: "Salah satu hal pokok yang harus dimiliki oleh seorang profesional di dalam dirinya adalah ....",
+                                        pilihan: { A: "keterampilan", B: "kelapangan", C: "kebijaksanaan", D: "pengalaman" },
+                                        kunci: "A",
+                                        penjelasan: "Profesionalisme ditandai dengan adanya Skill atau Keterampilan khusus."
+                                    }
+                                ]
+                            },
+                            // --- MODUL 2 BARU DITAMBAHKAN DI SINI ---
+                            "Modul 2: Sejarah dan Perkembangan Teknologi Informasi, Kode Etik Profesi": {
+                                "Tes Formatif 1": [
+                                    {
+                                        id: "m2-tf1-1",
+                                        pertanyaan: "Dalam teknologi informasi diperlukan seperangkat komputer dan sistem jaringan sesuai kebutuhan. Setidaknya ada tiga hal untuk membantu mendapatkan informasi yang relevan dan akurat, kecuali ....",
+                                        pilihan: { A: "data", B: "alat pengolah data", C: "alat penyaring data", D: "metode pengolah data" },
+                                        kunci: "C",
+                                        penjelasan: "Komponen dasar teknologi informasi meliputi Data, Alat pengolah (hardware/software), dan Metode pengolah. Alat penyaring bukan istilah baku dalam komponen utama ini."
+                                    },
+                                    {
+                                        id: "m2-tf1-2",
+                                        pertanyaan: "Kata teknologi berasal dari bahasa Prancis, yaitu 'la teknique' yang memiliki arti ....",
+                                        pilihan: { A: "sarana atau alat", B: "konsep", C: "ide", D: "garis besar" },
+                                        kunci: "A",
+                                        penjelasan: "Secara etimologi dari bahasa Perancis 'la teknique', teknologi berarti sarana atau alat yang digunakan untuk menyediakan barang yang diperlukan."
+                                    },
+                                    {
+                                        id: "m2-tf1-3",
+                                        pertanyaan: "Sejarah perkembangan Teknologi Informasi dan Komunikasi di dunia ini dapat dibagi ke dalam 3 bagian, yaitu masa ....",
+                                        pilihan: { A: "prasejarah", B: "sejarah", C: "awal sejarah", D: "modern" },
+                                        kunci: "D",
+                                        penjelasan: "Pembagian umum sejarah TIK adalah Masa Prasejarah, Masa Sejarah, dan Masa Modern."
+                                    },
+                                    {
+                                        id: "m2-tf1-4",
+                                        pertanyaan: "Tahun 500 SM, bangsa Mesir Kuno memakai pohon sebagai kertas. Serat pohon tersebut ditulisi beragam informasi. Pohon yang digunakan oleh bangsa Mesir Kuno adalah ....",
+                                        pilihan: { A: "pinus", B: "papirus", C: "bambu cina", D: "serat jati" },
+                                        kunci: "B",
+                                        penjelasan: "Bangsa Mesir Kuno menggunakan serat tanaman Papirus (Papyrus) sebagai media tulis, yang menjadi cikal bakal kertas."
+                                    },
+                                    {
+                                        id: "m2-tf1-5",
+                                        pertanyaan: "Johann Gutenberg adalah orang yang pertama kali mengembangkan mesin cetak dengan plat besi, lalu Johann Gutenberg mengganti plat besi tersebut dengan bingkai yang terbuat dari kayu pada tahun ....",
+                                        pilihan: { A: "1837", B: "1830", C: "1455", D: "1861" },
+                                        kunci: "C",
+                                        penjelasan: "Johann Gutenberg mengembangkan mesin cetak dengan bingkai kayu dan teknologi movable type sekitar tahun 1450-an, tepatnya sukses mencetak Alkitab pada 1455."
+                                    }
+                                ],
+                                "Tes Formatif 2": [
+                                    {
+                                        id: "m2-tf2-1",
+                                        pertanyaan: "Orang yang bertugas mengoperasikan program atau aplikasi yang berhubungan dengan EDP dalam sebuah perusahaan atau organisasi disebut ....",
+                                        pilihan: { A: "management information system", B: "system administrator", C: "operator electronic data processing", D: "electronic data programming" },
+                                        kunci: "C",
+                                        penjelasan: "EDP adalah Electronic Data Processing. Orang yang mengoperasikannya disebut Operator EDP."
+                                    },
+                                    {
+                                        id: "m2-tf2-2",
+                                        pertanyaan: "Beberapa hal yang perlu diperhatikan sebagai rasa tanggung jawab dari seseorang yang memiliki profesi di bidang TI adalah ....",
+                                        pilihan: { A: "kemandirian, komunikasi, dan keahlian", B: "etika, kompetensi, dan profesional", C: "etika, profesi, dan kemandirian", D: "kemandirian, tanggung jawab, dan komunikasi" },
+                                        kunci: "B",
+                                        penjelasan: "Tanggung jawab profesi TI mencakup integritas moral (etika), kemampuan teknis (kompetensi), dan sikap profesional."
+                                    },
+                                    {
+                                        id: "m2-tf2-3",
+                                        pertanyaan: "UU HAKI (Undang-Undang Hak Atas Kekayaan Intelektual atau Hak Cipta) yang sudah disahkan dengan Nomor 19 Tahun 2002 diberlakukan sejak ....",
+                                        pilihan: { A: "29 Juli 2003", B: "19 Juli 2003", C: "8 Agustus 2008", D: "14 Mei 2002" },
+                                        kunci: "A",
+                                        penjelasan: "UU No. 19 Tahun 2002 tentang Hak Cipta mulai berlaku efektif 12 bulan setelah diundangkan (diundangkan Juli 2002), yaitu 29 Juli 2003."
+                                    },
+                                    {
+                                        id: "m2-tf2-4",
+                                        pertanyaan: "Kejahatan komputer atau computer crime adalah kejahatan yang ditimbulkan karena penggunaan komputer secara ilegal. Kejahatan komputer terus berkembang seiring dengan kemajuan teknologi komputer saat ini. Beberapa jenis kejahatan komputer meliputi denial of services yang artinya ....",
+                                        pilihan: { A: "pencurian media internet", B: "melumpuhkan bagian komputer", C: "melumpuhkan layanan sistem komputer", D: "penyebaran virus pada komputer" },
+                                        kunci: "C",
+                                        penjelasan: "DoS (Denial of Service) adalah serangan yang bertujuan membuat layanan sistem/jaringan tidak tersedia bagi penggunanya (melumpuhkan layanan)."
+                                    },
+                                    {
+                                        id: "m2-tf2-5",
+                                        pertanyaan: "Berikut adalah kode etik yang diharapkan dimiliki oleh seorang programmer, KECUALI ....",
+                                        pilihan: { A: "tidak boleh membuat atau mendistribusikan Malware", B: "tidak boleh menulis materi agar sulit diikuti dengan sengaja", C: "tidak boleh menulis dokumentasi yang dengan sengaja membingungkan atau tidak akurat", D: "tidak boleh menggunakan ulang kode dengan hak cipta kecuali telah membeli atau meminta izin" },
+                                        kunci: "B",
+                                        penjelasan: "Opsi A, C, dan D adalah larangan etis yang benar. Sedangkan opsi B dianggap sebagai pengecualian yang paling subjektif dalam konteks soal ini."
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]);
+
+                // --- STATE SESSION & HISTORY ---
+                const userHistory = ref([]);
+                const currentSessionMap = ref({});
+
+                // --- NAVIGATION METHODS ---
+                const selectMatkul = (mk) => {
+                    selectedMatkul.value = mk;
+                    step.value = 2;
+                };
+                const selectModul = (modulName) => {
+                    selectedModulName.value = modulName;
+                    step.value = 3;
+                };
+                const selectTes = (tesName) => {
+                    selectedTesName.value = tesName;
+                    const key = getTesSessionKey();
+                    if(!currentSessionMap.value[key]) {
+                        currentSessionMap.value[key] = Date.now();
+                    }
+                    step.value = 4;
+                    window.scrollTo(0,0);
+                };
+                const goBack = () => {
+                    if(step.value > 1) step.value--;
+                };
+                const goHome = () => {
+                    step.value = 1;
+                    selectedMatkul.value = null;
+                };
+
+                // --- LOGIC HELPERS ---
+                const getTesList = computed(() => {
+                    if (!selectedMatkul.value || !selectedModulName.value) return {};
+                    return selectedMatkul.value.modul[selectedModulName.value];
+                });
+
+                const currentSoalList = computed(() => {
+                    if (step.value !== 4) return [];
+                    return getTesList.value[selectedTesName.value];
+                });
+
+                const getTesSessionKey = () => {
+                    return `${selectedMatkul.value.kode}-${selectedModulName.value}-${selectedTesName.value}`;
+                };
+
+                const getCurrentTesSessionID = () => {
+                    const key = getTesSessionKey();
+                    return currentSessionMap.value[key] || 0;
+                };
+
+                // --- ANSWER LOGIC ---
+                const submitAnswer = (soal, selectedKey) => {
+                    const isCorrect = selectedKey === soal.kunci;
+                    
+                    const record = {
+                        soalId: soal.id,
+                        selected: selectedKey,
+                        isCorrect: isCorrect,
+                        timestamp: new Date().toISOString(),
+                        tesSessionId: getCurrentTesSessionID(),
+                        matkul: selectedMatkul.value.kode,
+                        modul: selectedModulName.value,
+                        tes: selectedTesName.value
+                    };
+
+                    userHistory.value.unshift(record);
+                    saveHistory();
+                };
+
+                const resetCurrentTes = () => {
+                    if(confirm("Yakin ingin mereset tes ini? Jawaban Anda saat ini akan hilang dari tampilan, tapi riwayat tetap tersimpan.")) {
+                        const key = getTesSessionKey();
+                        currentSessionMap.value[key] = Date.now();
+                        saveHistory();
+                    }
+                };
+
+                const isAnsweredInCurrentSession = (soalId) => {
+                    const currentID = getCurrentTesSessionID();
+                    return userHistory.value.some(h => h.soalId === soalId && h.tesSessionId === currentID);
+                };
+
+                const getLastAnswer = (soalId) => {
+                    const currentID = getCurrentTesSessionID();
+                    return userHistory.value.find(h => h.soalId === soalId && h.tesSessionId === currentID);
+                };
+
+                const getHistoryBySoal = (soalId) => {
+                    return userHistory.value.filter(h => h.soalId === soalId);
+                };
+
+                const hasHistory = (matkul, modul, tes) => {
+                     return userHistory.value.some(h => h.matkul === matkul && h.modul === modul && h.tes === tes);
+                };
+
+                // --- STYLING HELPERS ---
+                const getOptionClass = (soal, key) => {
+                    const answer = getLastAnswer(soal.id);
+                    if (!answer) return 'border-slate-200 hover:bg-slate-50 hover:border-indigo-300';
+
+                    if (answer.selected === key) {
+                        return answer.isCorrect 
+                            ? 'bg-green-100 border-green-500 ring-1 ring-green-500' 
+                            : 'bg-red-100 border-red-500 ring-1 ring-red-500';
+                    }
+                    return 'opacity-50 border-slate-100 cursor-not-allowed';
+                };
+
+                const getOptionBulletClass = (soal, key) => {
+                     const answer = getLastAnswer(soal.id);
+                     if (!answer) return 'border-slate-300 text-slate-400 group-hover:border-indigo-400 group-hover:text-indigo-400';
+                     
+                     if (answer.selected === key) {
+                        return answer.isCorrect ? 'border-green-600 text-green-700 bg-white' : 'border-red-600 text-red-700 bg-white';
+                     }
+                     return 'border-slate-200 text-slate-300';
+                };
+
+                const formatDate = (isoString) => {
+                    const d = new Date(isoString);
+                    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' });
+                };
+
+                // --- STORAGE ---
+                const saveHistory = () => {
+                    localStorage.setItem('ut_latihan_history', JSON.stringify(userHistory.value));
+                    localStorage.setItem('ut_latihan_sessions', JSON.stringify(currentSessionMap.value));
+                };
+
+                const loadHistory = () => {
+                    const h = localStorage.getItem('ut_latihan_history');
+                    const s = localStorage.getItem('ut_latihan_sessions');
+                    if (h) userHistory.value = JSON.parse(h);
+                    if (s) currentSessionMap.value = JSON.parse(s);
+                };
+
+                onMounted(() => {
+                    loadHistory();
+                });
+
+                return {
+                    step,
+                    matakuliahList,
+                    selectedMatkul,
+                    selectedModulName,
+                    selectedTesName,
+                    getTesList,
+                    currentSoalList,
+                    selectMatkul,
+                    selectModul,
+                    selectTes,
+                    goBack,
+                    goHome,
+                    submitAnswer,
+                    isAnsweredInCurrentSession,
+                    getLastAnswer,
+                    getHistoryBySoal,
+                    getOptionClass,
+                    getOptionBulletClass,
+                    resetCurrentTes,
+                    formatDate,
+                    hasHistory
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
